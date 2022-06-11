@@ -3,10 +3,19 @@
     <div>
         <b-navbar id="navbar" toggleable="lg" type="dark" variant="dark">
             <b-navbar-brand>Visual Analytics Project</b-navbar-brand>
-            <b-nav-text>VAST 2021 | Mini-Challenge 2</b-nav-text>
+            <b-nav-text>VAST 2021 Mini-Challenge 2</b-nav-text>
         </b-navbar>
     </div>
     <MiniChallenge2/>
+    <div>
+      <footer class="bg-light text-center text-lg-start">
+        <!-- Copyright -->
+        <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+          Visual Analytics Project - VAST 2021 Mini-Challenge 2
+        </div>
+        <!-- Copyright -->
+      </footer>
+    </div>
   </div>
 </template>
 
@@ -35,5 +44,9 @@ export default {
     .navbar-expand-lg {
         justify-content: center;
     }
+}
+
+footer{
+  margin-top:100px;
 }
 </style>

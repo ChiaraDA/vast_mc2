@@ -19,12 +19,17 @@
             </b-col>
             <b-col md="3"></b-col>
         </b-row>
+        
+        <b-row id="text_row" align-v="stretch" class="b-row">
+            <b-col class="shadow p-3 rounded">Text</b-col>
+        </b-row>
 
         <b-row id="graphic_row" align-v="stretch" class="b-row">
             <b-col class="shadow p-3 rounded">Graphic 1</b-col>
             <b-col class="shadow p-3 rounded">Graphic 2</b-col>
             <b-col class="shadow p-3 rounded">Graphic 3</b-col>
         </b-row>
+
     </b-container>
 </template>
 
@@ -47,7 +52,7 @@
     margin-bottom:20px;
 }
 
-#graphic_row{
+#text_row{
     margin-top:100px;
 }
 
