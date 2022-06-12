@@ -6,7 +6,7 @@
             <b-nav-text>VAST 2021 Mini-Challenge 2</b-nav-text>
         </b-navbar>
     </div>
-    <MiniChallenge2/>
+    <mc2_board/>
     <div>
       <footer class="bg-light text-center text-lg-start">
         <!-- Copyright -->
@@ -20,12 +20,12 @@
 </template>
 
 <script>
-import MiniChallenge2 from './components/MiniChallenge2.vue'
+import mc2_board from './components/mc2_board.vue'
 
 export default {
   name: 'App',
   components: {
-    MiniChallenge2
+    mc2_board
   }
 }
 </script>
