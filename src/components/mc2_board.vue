@@ -1,23 +1,26 @@
 <template>
     <b-container id="board" class="board">
 
+        <b-row id="range_date_row" align-v="stretch" class="b-row">
+            <b-col class="p-0 d-flex" cols="12" md="2"><b-button class="flex-fill">Start Time Line</b-button></b-col>
+            <b-col class="range d-flex" md="7">
+
+                <div id="range_date_time" class="flex-fill d-flex align-items-center">
+                    <b-form-input id="range-1" v-model="value" type="range" min="1" max="14"></b-form-input>
+                </div>
+            
+            </b-col>
+            
+            <b-col md="3"><div class="mt-2">Date and Time: {{ value }}</div></b-col>
+        </b-row>
+
         <b-row id="map_row" align-v="stretch" class="b-row">
             <b-col class="map shadow rounded p-3">Map</b-col>
             <b-col class="shadow p-3 rounded" cols="12" md="3">Data</b-col>
         </b-row>
 
-        <b-row id="range_date_row" align-v="stretch" class="b-row">
-            <b-button>Start</b-button>
-            <b-col class="range">
-
-                <div class="stretch">
-                    <label>Time line</label>
-                    <b-form-input id="range-1" v-model="value" type="range" min="1" max="14"><b-button>Button</b-button></b-form-input>
-                </div>
-                
-                <div class="mt-2">Date and time: {{ value }}</div>
-            </b-col>
-            <b-col md="3"></b-col>
+        <b-row id="node_row" align-v="stretch" class="b-row">
+            <b-col class="node shadow rounded p-3">Node</b-col>
         </b-row>
 
         <b-row id="graphic_row" align-v="stretch" class="b-row">
@@ -52,12 +55,20 @@
     margin-bottom:20px;
 }
 
-#graphic_row{
+#node_row{
     margin-top:100px;
 }
 
 .map{
+    height:550px;
+}
+
+.node{
     height:500px;
+}
+
+#range_date_time{
+    vertical-align: bottom;
 }
 
 </style>
