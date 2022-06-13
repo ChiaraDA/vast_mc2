@@ -2,7 +2,7 @@
     <b-container id="board" class="board">
 
         <b-row id="range_date_row" align-v="stretch" class="b-row">
-            <b-col class="p-0 d-flex" cols="12" md="2"><b-button class="flex-fill">Start Time Line</b-button></b-col>
+            <b-col class="p-0 d-flex" cols="12" md="2"><b-button class="flex-fill">Start Timeline</b-button></b-col>
             <b-col class="range d-flex" md="7">
 
                 <div id="range_date_time" class="flex-fill d-flex align-items-center">
@@ -19,8 +19,8 @@
             <b-col class="shadow p-3 rounded" cols="12" md="3">Data</b-col>
         </b-row>
 
-        <b-row id="node_row" align-v="stretch" class="b-row">
-            <b-col class="node shadow rounded p-3">Node</b-col>
+        <b-row id="comparison_row" align-v="stretch" class="b-row">
+            <b-col class="comparison shadow rounded p-3">Timeline Comparison</b-col>
         </b-row>
 
         <b-row id="graphic_row" align-v="stretch" class="b-row">
@@ -55,7 +55,7 @@
     margin-bottom:20px;
 }
 
-#node_row{
+#graphic_row{
     margin-top:100px;
 }
 
@@ -64,7 +64,11 @@
 }
 
 .node{
-    height:500px;
+    height:400px;
+}
+
+.comparison{
+    height:150px;
 }
 
 #range_date_time{
