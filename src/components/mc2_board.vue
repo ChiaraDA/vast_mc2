@@ -2,8 +2,8 @@
     <b-container id="board" class="board">
 
         <b-row id="range_date_row" align-v="stretch" class="b-row">
-            <b-col class="p-0 d-flex" cols="12" md="2"><b-button class="flex-fill">Start Timeline</b-button></b-col>
-            <b-col class="range d-flex" md="7">
+            <b-col class="p-0 d-flex" cols="2"><b-button class="flex-fill">Start Timeline</b-button></b-col>
+            <b-col class="range d-flex" cols="7">
 
                 <div id="range_date_time" class="flex-fill d-flex align-items-center">
                     <b-form-input id="range-1" v-model="value" type="range" min="1" max="14"></b-form-input>
@@ -11,12 +11,12 @@
             
             </b-col>
             
-            <b-col md="3"><div class="mt-2">Date and Time: {{ value }}</div></b-col>
+            <b-col cols="3"><div class="mt-2">Date and Time: {{ value }}</div></b-col>
         </b-row>
 
         <b-row id="map_row" align-v="stretch" class="b-row">
-            <b-col class="map shadow rounded p-3">Map</b-col>
-            <b-col class="shadow p-3 rounded" cols="12" md="4">Data</b-col>
+            <b-col class="map shadow rounded p-3">Map<mc2_map/></b-col>
+            <b-col class="shadow p-3 rounded" cols="4">Data</b-col>
         </b-row>
 
         <b-row id="comparison_row" align-v="stretch" class="b-row">
@@ -41,13 +41,20 @@
 </template>
 
 <script>
+import mc2_map from './mc2_map.vue'
+
   export default {
+    name: 'mc2_board',
+    components: {
+        mc2_map
+    },
     data() {
       return {
         value: '1'
       }
     }
   }
+
 </script>
 
 <style>
@@ -87,5 +94,4 @@
 #range_date_time{
     vertical-align: bottom;
 }
-
 </style>
