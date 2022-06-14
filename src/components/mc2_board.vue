@@ -16,17 +16,21 @@
 
         <b-row id="map_row" align-v="stretch" class="b-row">
             <b-col class="map shadow rounded p-3">Map</b-col>
-            <b-col class="shadow p-3 rounded" cols="12" md="3">Data</b-col>
+            <b-col class="shadow p-3 rounded" cols="12" md="4">Data</b-col>
         </b-row>
 
         <b-row id="comparison_row" align-v="stretch" class="b-row">
             <b-col class="comparison shadow rounded p-3">Timeline Comparison</b-col>
         </b-row>
 
-        <b-row id="graphic_row" align-v="stretch" class="b-row">
+        <b-row id="graphic_row1" align-v="stretch" class="b-row">
             <b-col class="shadow p-3 rounded">Graphic 1</b-col>
             <b-col class="shadow p-3 rounded">Graphic 2</b-col>
+        </b-row>
+
+        <b-row id="graphic_row2" align-v="stretch" class="b-row">
             <b-col class="shadow p-3 rounded">Graphic 3</b-col>
+            <b-col class="shadow p-3 rounded">Graphic 4</b-col>
         </b-row>
         
         <b-row id="text_row" align-v="stretch" class="b-row">
@@ -55,7 +59,16 @@
     margin-bottom:20px;
 }
 
-#graphic_row{
+#text_row{
+    margin-top:100px;
+}
+
+#graphic_row1{
+    height:400px;
+}
+
+#graphic_row2{
+    height:400px;
     margin-top:100px;
 }
 
