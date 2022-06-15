@@ -15,7 +15,7 @@
         </b-row>
 
         <b-row id="map_row" align-v="stretch" class="b-row">
-            <b-col class="map shadow rounded p-3">Map<mc2_map/></b-col>
+            <b-col class="map shadow rounded p-3"><mc2_map/></b-col>
             <b-col class="shadow p-3 rounded" cols="4">Data</b-col>
         </b-row>
 
