@@ -2,8 +2,8 @@
     <b-container id="board" class="board">
 
         <b-row id="range_date_row" align-v="stretch" class="b-row">
-            <b-col class="p-0 d-flex" cols="2"><b-button class="flex-fill">Start Timeline</b-button></b-col>
-            <b-col class="range d-flex" cols="7">
+            <b-col class="b-col p-0 d-flex border" sm="2"><b-button class="flex-fill">Start Timeline</b-button></b-col>
+            <b-col class="b-col range d-flex border" sm="7">
 
                 <div id="range_date_time" class="flex-fill d-flex align-items-center">
                     <b-form-input id="range-1" v-model="value" type="range" min="1" max="14"></b-form-input>
@@ -11,30 +11,30 @@
             
             </b-col>
             
-            <b-col cols="3"><div class="mt-2">Date and Time: {{ value }}</div></b-col>
+            <b-col sm="3" class="b-col border"><div class="mt-2">Date and Time: {{ value }}</div></b-col>
         </b-row>
 
         <b-row id="map_row" align-v="stretch" class="b-row">
-            <b-col class="map shadow rounded p-3"><mc2_map/></b-col>
-            <b-col class="shadow p-3 rounded" cols="4">Data</b-col>
+            <b-col class="b-col map border" md="8" ><mc2_map/></b-col>
+            <b-col class="b-col border" md="4" >Data</b-col>
         </b-row>
 
         <b-row id="comparison_row" align-v="stretch" class="b-row">
-            <b-col class="comparison shadow rounded p-3">Timeline Comparison</b-col>
+            <b-col class="b-col comparison border">Timeline Comparison</b-col>
         </b-row>
 
         <b-row id="graphic_row1" align-v="stretch" class="b-row">
-            <b-col class="shadow p-3 rounded">Graphic 1</b-col>
-            <b-col class="shadow p-3 rounded">Graphic 2</b-col>
+            <b-col class="b-col border" md="6">Graphic 1</b-col>
+            <b-col class="b-col border" md="6">Graphic 2</b-col>
         </b-row>
 
         <b-row id="graphic_row2" align-v="stretch" class="b-row">
-            <b-col class="shadow p-3 rounded">Graphic 3</b-col>
-            <b-col class="shadow p-3 rounded">Graphic 4</b-col>
+            <b-col class="b-col border" md="6">Graphic 3</b-col>
+            <b-col class="b-col border" md="6">Graphic 4</b-col>
         </b-row>
         
         <b-row id="text_row" align-v="stretch" class="b-row">
-            <b-col class="shadow p-3 rounded">Text</b-col>
+            <b-col class="b-col border">Text</b-col>
         </b-row>
 
     </b-container>
@@ -63,7 +63,12 @@ import mc2_map from './mc2_map.vue'
 }
 
 .b-row{
-    margin-bottom:20px;
+    margin-bottom:10px;
+}
+
+.b-col{
+    padding:10px;
+    border: solid black 1px;
 }
 
 #text_row{
@@ -80,15 +85,15 @@ import mc2_map from './mc2_map.vue'
 }
 
 .map{
-    height:550px;
-}
-
-.node{
-    height:400px;
+    height:auto;
 }
 
 .comparison{
     height:150px;
+}
+
+#map_row{
+    height:fit-content;
 }
 
 #range_date_time{
