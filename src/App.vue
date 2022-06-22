@@ -25,7 +25,7 @@ import mc2_board from './components/mc2_board.vue'
 export default {
   name: 'App',
   components: {
-    mc2_board
+    mc2_board,
   }
 }
 </script>
@@ -49,6 +49,5 @@ export default {
 footer{
   margin-top:100px;
 }
-
 
 </style>
