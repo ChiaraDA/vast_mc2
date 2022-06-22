@@ -16,8 +16,8 @@
         <img src="@/assets/MC2-tourist.jpg" id="img_map" class="img-fluid">
       </b-col>
       <b-col class="b-col" xl="4" >
-            <b-card bg-variant="light" header="Cars Data" class="text-center">
-              <div v-if="selected_cars" id="cars_data" >
+            <b-card bg-variant="light" header="Cars Data" class="text-center" id="cars_data" >
+              <div v-if="selected_cars" class="pb-5" >
                 <div class="p-3"><b>{{count_cars}} Cars Selected</b></div>
                 <b-card-text v-for="p in persons_car" :key="p.identifier" v-show="p.selected">
                   {{p.last_name}} {{p.first_name}}, <i>{{p.emp_title}}</i>
@@ -192,8 +192,9 @@ export default {
 
 #cars_data{
   overflow:scroll;
+  overflow-x:hidden;
   height:auto;
-  max-height:430px;
+  max-height:500px;
 }
 
 svg g.trajectories path {
