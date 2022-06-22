@@ -1,0 +1,30 @@
+d3.tsv('./csv/cc_data.csv')
+            .then((rows) => {
+                const data = rows
+                    .map((row) => {
+                        const entries = Object.values(row).toString().split(",");
+                        return {
+                            date: entries[0].split(" ")[0],
+                            time: entries[0].split(" ")[1],
+                            location: entries[1],
+                            price: entries[2],
+                            last4ccnum: entries[3]
+
+                        }
+                    })
+                console.log(data)
+            })
+
+
+
+watch: {
+    timeInterval(newVal) {
+        const interval = [Math.max(0, newVal - 10), newVal];
+        trajectories.timeExtent(interval);
+        d3.select(this.$refs.trajectories)
+            .call(trajectories);
+    }
+} 
+
+
+Object.values(d.values).map(d => Object.values(d))

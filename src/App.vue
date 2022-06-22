@@ -49,4 +49,6 @@ export default {
 footer{
   margin-top:100px;
 }
+
+
 </style>
