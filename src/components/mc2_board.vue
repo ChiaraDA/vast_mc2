@@ -1,12 +1,19 @@
 <template>
     <b-container id="board" class="board">
-
+        
+        <b-row align-v="stretch" class="b-row pl-4 pr-4">
+            <b-col class="b-col p-0" md="4" >
+              <div id="step_minute" class="align-items-center">
+                  <p>Enter a Value to Increase the Time <b>Faster</b></p>
+                  <b-form-input v-model="step" type="number" :state="nameState" min="1" max="24713"></b-form-input>
+              </div>
+            </b-col>
+        </b-row>
         <b-row align-v="stretch" class="b-row pl-4 pr-4">
             <b-col class="b-col p-0" md="12" >
-            <div id="range_date_time" class=" align-items-center">
-                <div v-bind:class="current_date_time(timeInterval)">Date and Time: {{date_time}}</div>
-                <b-form-input class="mt-3" id="time" v-model="timeInterval" type="range" min="0" max="25000" step="1"></b-form-input>
-            </div>
+              <div id="date_time" class=" align-items-center">
+                  <b-form-spinbutton ref="time" v-model="timeInterval" :formatter-fn="current_date_time" :step="step" max="24713" :disabled="block_time"></b-form-spinbutton>
+              </div>
             </b-col>
         </b-row>
         <b-row id="map_row" align-v="stretch" class="b-row">
@@ -14,8 +21,25 @@
             <b-col class="b-col" xl="4" ><mc2_carsData ref="cars_data"/></b-col>
         </b-row>
 
-        <b-row id="charts_row1" align-v="stretch" class="b-row">
-            <b-col class="b-col" md="12"><mc2_charts/></b-col>
+        <b-row id="charts_row1" align-v="stretch" class="b-row mt-5">
+            <b-col class="b-col" md="4">
+              <h3>Locations List</h3>
+                <b-list-group id="location_list">
+                <b-list-group-item ref="locations_list" v-for="(location,i) in locations" :key="i" :class="{active:location === activeItem}" @click="get_location(location)"  button>{{location}}</b-list-group-item>
+                </b-list-group>
+            </b-col>
+            <b-col class="b-col" md="4">
+            </b-col>
+            <b-col class="b-col" md="4">
+            </b-col>
+        </b-row>
+
+        <b-row id="charts_row2" align-v="stretch" class="b-row mt-5">
+            <b-col class="b-col" md="12">
+                <b-card bg-variant="light" header="Locations Popularity" class="text-center">
+                    <b-card-text><mc2_charts :cfAggregation="pop_location"></mc2_charts></b-card-text>
+                </b-card>
+            </b-col>
         </b-row>
 
 
@@ -27,7 +51,7 @@ import mc2_map from '@/components/mc2_map.vue';
 import mc2_carsData from '@/components/mc2_carsData.vue';
 import mc2_charts from '@/components/mc2_charts.vue';
 import Trajectories from "@/assets/Trajectories";
-//import crossfilter from 'crossfilter';
+import crossfilter from 'crossfilter';
 
 const trajectories = Trajectories();
 
@@ -37,6 +61,12 @@ function euclideanDistance(a, b) {
 
 const d3 = require('d3')
 console.log("D3 Module:", d3);
+
+let cf;
+//let cf2;
+//let cf3;
+let dWeekPop;
+let dLocations;
 
 export default {
   name: 'mc2_board',
@@ -48,11 +78,15 @@ export default {
   data() {
     return {
         timeInterval:0,
-        date_time:""
+        date_time:String,
+        locations:[],
+        location_days:{},
+        activeItem:String,
+        pop_location:[],
+        step:1
     }
   },
   mounted() {
-    console.log(d3.select("#abila_map"))
     d3.csv("./csv/car-assignments.csv").then((rows) => {
       const car_data = rows.map((row, i) => {
         const entries = Object.values(row);
@@ -93,7 +127,6 @@ export default {
           values: d[1].map((p) => ({
             latitude: p.latitude,
             longitude: p.longitude,
-            timestamp: p.timestamp,
           })),
           path_length: pl.reduce((a, b) => a + b, 0),
           delta_s: pl,
@@ -127,21 +160,129 @@ export default {
         }
       })
     })
+    
+
+    Promise.all([
+      d3.csv("./csv/cc_data.csv"),
+      d3.csv("./csv/loyalty_data.csv")
+    ]).then(([cc_rows, lc_rows]) => {
+        const cc_data = cc_rows.map((d) => {
+            const dateFormat = d3.timeParse("%m/%d/%Y %H:%M");
+            const thisDate = dateFormat(d.timestamp);
+            const date = new Date(thisDate);
+            const format_date = d3.timeFormat("%A")
+            const final_date = format_date(date)
+            const credit_card_data = {
+                Timestamp: d.timestamp.split(" ")[0],
+                Week_Day: final_date,
+                Location: d.location,
+                Price: +d.price,
+                Last4cc: d.last4ccnum
+            }
+            return credit_card_data;
+        });
+        console.log("ALL CC", cc_data)
+
+        const lc_data = lc_rows.map((d) => {
+            const dateFormat = d3.timeParse("%m/%d/%Y");
+            const thisDate = dateFormat(d.timestamp);
+            const date = new Date(thisDate);
+            const format_date = d3.timeFormat("%A")
+            const final_date = format_date(date)
+            const loyalty_card_data = {
+                Timestamp: d.timestamp,
+                Week_Day: final_date,
+                Location: d.location,
+                Price: +d.price,
+                Card_number: d.loyaltynum
+            }
+            return loyalty_card_data;
+        });
+        console.log("ALL CF", lc_data)
+
+        let cc_cf = []
+        let cc_new = []
+        let lc_new = []
+        
+        Object.values(cc_data).forEach(d => Object.values(lc_data).forEach(f => {
+            if(d.Location == f.Location && d.Timestamp == f.Timestamp && f.Price == d.Price){
+              cc_data.splice(cc_data.indexOf(d),1);
+              lc_data.splice(lc_data.indexOf(f),1);
+              d.lc_number = f.Card_number
+              cc_cf.push(d)
+            } 
+          })
+        )
+        cc_new = cc_data
+        lc_new = lc_data
+        console.log("CC", cc_new)
+        console.log("CF", lc_new)
+        console.log("CF AND CC", cc_cf)
+
+        const array_of_cards = [...cc_new, ...lc_new, ...cc_cf];
+        console.log(array_of_cards)
+
+        cf = crossfilter(array_of_cards);
+        //cf2 = crossfilter(cf_data);
+
+        dLocations = cf.dimension(d => d.Location);
+
+        this.locations = dLocations.group().reduceCount().all().map(d => d.key);
+        console.log(this.locations)
+
+        const days = {'Monday': 1,'Tuesday': 2,'Wednesday': 3,'Thursday': 4,'Friday': 5,'Saturday': 6,'Sunday': 7};
+
+        dWeekPop = cf.dimension(function (d) {
+          return JSON.stringify ( { location: d.Location , week_day: d.Week_Day } ) ;
+        });
+
+        const group = dWeekPop.group();
+        group.all().forEach(function(d) {
+          d.key = JSON.parse(d.key);
+        });
+        const location_days = group.all();
+
+        location_days.sort((a, b) => {
+          return days[a.key.week_day] - days[b.key.week_day];
+        });
+
+        this.location_days = location_days
+        
+        console.log("Location and Days", location_days)
+      });
+    
+  },
+  computed:{
+    nameState(){
+      return this.step >= 1 && this.step <= 24713 ? true : false;
+    },
+    
+    block_time() {
+      return this.step < 1 || this.step > 24713  ? true : false
+    },
   },
   methods:{
-    current_date_time: function (value) {
-          const start = new Date(2014, 0, 6, 7, 28, 1)
-          const end = new Date(2014, 0, 19, 21, 56, 55)
-          const timeScale = d3.scaleTime()
-              .domain([start, end])
-              .range([0, 25000])
-          const date = timeScale.invert(value)
-          this.date_time = d3.timeFormat("%B %d, %Y - %H:%m:%S")(date)
-      }
+    current_date_time(value) {
+      const start = new Date(2014, 0, 6, 6, 28)
+      const end = new Date(2014, 0, 19, 21, 56)
+      const timeScale = d3.scaleTime()
+          .domain([start, end])
+          .range([0, 24713])
+      const date = timeScale.invert(value)
+      this.date_time = d3.timeFormat("%B %d, %Y - %H:%M")(date)
+      return this.date_time;
+    },
+    get_location(loc) {
+      this.activeItem = loc
+      this.activeItem = loc;
+      const activeItem_getData = this.location_days.filter(d => (d.key.location == this.activeItem));
+      console.log("Active Item Data", activeItem_getData)
+      this.pop_location = activeItem_getData
+    }
   },
   watch: {
     timeInterval(newVal) {
-      const interval = [Math.max(0, newVal - 10), newVal];
+      const interval = [Math.max(0, newVal-10), newVal];
       trajectories.timeExtent(interval);
       d3.select("#trajectories").call(trajectories);
     },
@@ -178,6 +319,8 @@ export default {
   z-index: -1;
   height: 100%;
   width:100%;
+  padding-left:10px;
+  padding-right:10px;
 }
 
 #cars_data{
@@ -188,12 +331,17 @@ export default {
 }
 
 svg g.trajectories path {
-  stroke: #262626
+  stroke: blue
 }
 
 svg g.trajectories path.selected {
   stroke: red
 }
 
+#location_list{
+  overflow:scroll;
+  overflow-x:hidden;
+  height:300px;
+}
 
 </style>

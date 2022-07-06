@@ -28,8 +28,5 @@ export default {
       count_cars:0,
     };
   },
-  mounted() {
-    console.log(this.persons_car)
-  }
 }
 </script>

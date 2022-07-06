@@ -51,7 +51,7 @@ export default function Trajectories() {
     const brush = d3.brush()
         .on('end', brushed)
 
-    let timeExtent = [0, 25000]
+    let timeExtent = [0, 24713]
 
     function me(selection) {
 
