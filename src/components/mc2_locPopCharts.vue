@@ -21,7 +21,7 @@ export default {
     data() {
         return {
             data: [{
-                x:["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"],
+                x:["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
                 y:[0,0,0,0,0,0,0],
             }],
             layout: {

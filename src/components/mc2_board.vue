@@ -23,22 +23,26 @@
 
         <b-row id="charts_row1" align-v="stretch" class="b-row mt-5">
             <b-col class="b-col" md="4">
-              <h3>Locations List</h3>
+              <h5>Locations List</h5>
                 <b-list-group id="location_list">
                 <b-list-group-item ref="locations_list" v-for="(location,i) in locations" :key="i" :class="{active:location === activeItem}" @click="get_location(location)"  button>{{location}}</b-list-group-item>
                 </b-list-group>
             </b-col>
             <b-col class="b-col" md="4">
+              <mc2_cardsData ref="cards_data"></mc2_cardsData>
             </b-col>
             <b-col class="b-col" md="4">
+              <b-card bg-variant="light" header="Payment Methods Distribution" class="text-center">
+                  <b-card-text><mc2_cardsCharts :cfAggregation="cards_data_active"></mc2_cardsCharts></b-card-text>
+              </b-card>
             </b-col>
         </b-row>
 
         <b-row id="charts_row2" align-v="stretch" class="b-row mt-5">
             <b-col class="b-col" md="12">
-                <b-card bg-variant="light" header="Locations Popularity" class="text-center">
-                    <b-card-text><mc2_charts :cfAggregation="pop_location"></mc2_charts></b-card-text>
-                </b-card>
+              <b-card bg-variant="light" header="Locations Popularity" class="text-center">
+                <b-card-text><mc2_locPopCharts :cfAggregation="pop_location"></mc2_locPopCharts></b-card-text>
+              </b-card>
             </b-col>
         </b-row>
 
@@ -49,7 +53,9 @@
 <script>
 import mc2_map from '@/components/mc2_map.vue';
 import mc2_carsData from '@/components/mc2_carsData.vue';
-import mc2_charts from '@/components/mc2_charts.vue';
+import mc2_locPopCharts from '@/components/mc2_locPopCharts.vue';
+import mc2_cardsCharts from '@/components/mc2_cardsCharts.vue';
+import mc2_cardsData from '@/components/mc2_cardsData.vue';
 import Trajectories from "@/assets/Trajectories";
 import crossfilter from 'crossfilter';
 
@@ -63,17 +69,19 @@ const d3 = require('d3')
 console.log("D3 Module:", d3);
 
 let cf;
-//let cf2;
-//let cf3;
 let dWeekPop;
 let dLocations;
+let dCards;
+let array_of_cards;
 
 export default {
   name: 'mc2_board',
   components: {
     mc2_map,
-    mc2_charts,
-    mc2_carsData
+    mc2_locPopCharts,
+    mc2_carsData,
+    mc2_cardsCharts,
+    mc2_cardsData,
   },
   data() {
     return {
@@ -81,9 +89,11 @@ export default {
         date_time:String,
         locations:[],
         location_days:{},
-        activeItem:String,
+        activeItem: String,
         pop_location:[],
-        step:1
+        step:1,
+        cards_data: [],
+        cards_data_active: [],
     }
   },
   mounted() {
@@ -170,11 +180,14 @@ export default {
             const dateFormat = d3.timeParse("%m/%d/%Y %H:%M");
             const thisDate = dateFormat(d.timestamp);
             const date = new Date(thisDate);
-            const format_date = d3.timeFormat("%A")
-            const final_date = format_date(date)
+            const format_weekD = d3.timeFormat("%A")
+            const format_day = d3.timeFormat("%B %d, %Y")
+            const final_weekD = format_weekD(date)
+            const final_day = format_day(date)
             const credit_card_data = {
-                Timestamp: d.timestamp.split(" ")[0],
-                Week_Day: final_date,
+                Day: final_day,
+                DayTime: d.timestamp,
+                Week_Day: final_weekD,
                 Location: d.location,
                 Price: +d.price,
                 Last4cc: d.last4ccnum
@@ -187,11 +200,14 @@ export default {
             const dateFormat = d3.timeParse("%m/%d/%Y");
             const thisDate = dateFormat(d.timestamp);
             const date = new Date(thisDate);
-            const format_date = d3.timeFormat("%A")
-            const final_date = format_date(date)
+            const format_weekD = d3.timeFormat("%A")
+            const format_day = d3.timeFormat("%B %d, %Y")
+            const final_weekD = format_weekD(date)
+            const final_day = format_day(date)
             const loyalty_card_data = {
-                Timestamp: d.timestamp,
-                Week_Day: final_date,
+                Day: final_day,
+                DayTime: d.timestamp,
+                Week_Day: final_weekD,
                 Location: d.location,
                 Price: +d.price,
                 Card_number: d.loyaltynum
@@ -205,25 +221,29 @@ export default {
         let lc_new = []
         
         Object.values(cc_data).forEach(d => Object.values(lc_data).forEach(f => {
-            if(d.Location == f.Location && d.Timestamp == f.Timestamp && f.Price == d.Price){
+            if(d.Location == f.Location && d.Day == f.Day && f.Price == d.Price){
               cc_data.splice(cc_data.indexOf(d),1);
               lc_data.splice(lc_data.indexOf(f),1);
               d.lc_number = f.Card_number
               cc_cf.push(d)
-            } 
+            } else {
+              d.category = "CC"
+              f.category = "Cash"
+            }
           })
         )
+
+        cc_cf.map(d => d.category = "Both")
         cc_new = cc_data
         lc_new = lc_data
         console.log("CC", cc_new)
         console.log("CF", lc_new)
         console.log("CF AND CC", cc_cf)
 
-        const array_of_cards = [...cc_new, ...lc_new, ...cc_cf];
-        console.log(array_of_cards)
+        array_of_cards = [...cc_new, ...lc_new, ...cc_cf];
+        console.log("All cards data", array_of_cards)
 
         cf = crossfilter(array_of_cards);
-        //cf2 = crossfilter(cf_data);
 
         dLocations = cf.dimension(d => d.Location);
 
@@ -249,6 +269,20 @@ export default {
         this.location_days = location_days
         
         console.log("Location and Days", location_days)
+
+        dCards = cf.dimension(function (d) {
+          return JSON.stringify ( { location: d.Location, category: d.category , day: d.Day } ) ;
+        });
+        const group_cards = dCards.group();
+        group_cards.all().map(function(d) {
+          d.key = JSON.parse(d.key);
+        });
+        const cat_days = group_cards.all();
+        
+        this.cards_data = cat_days
+        console.log("Cards data", this.cards_data)
+        
+
       });
     
   },
@@ -275,9 +309,24 @@ export default {
     get_location(loc) {
       this.activeItem = loc
       this.activeItem = loc;
-      const activeItem_getData = this.location_days.filter(d => (d.key.location == this.activeItem));
-      console.log("Active Item Data", activeItem_getData)
-      this.pop_location = activeItem_getData
+
+      const activeItem_getDataLoc = this.location_days.filter(d => (d.key.location == this.activeItem));
+      console.log("Active Item Data", activeItem_getDataLoc)
+      this.pop_location = activeItem_getDataLoc
+
+      const activeItem_getDataCards = this.cards_data.filter(d => (d.key.day == this.date_time.split(" -")[0] && d.key.location == this.activeItem));
+      console.log("Active Item Data Cards", activeItem_getDataCards)
+      this.cards_data_active = activeItem_getDataCards
+
+      const activeItem_ccDetails = array_of_cards.filter(d => d.Location == this.activeItem && d.Day == this.date_time.split(" -")[0] && d.category == "CC");
+      console.log("Active Item Cc Details", activeItem_ccDetails)
+      this.$refs.cards_data.cc_details = activeItem_ccDetails
+
+      const activeItem_cashDetails = array_of_cards.filter(d => (d.Day == this.date_time.split(" -")[0] && d.Location == this.activeItem && d.category == "Cash"));
+      this.$refs.cards_data.cash_details = activeItem_cashDetails
+
+      const activeItem_bothDetails = array_of_cards.filter(d => (d.Day == this.date_time.split(" -")[0] && d.Location == this.activeItem && d.category == "Both"));
+      this.$refs.cards_data.both_details = activeItem_bothDetails
     }
   },
   watch: {
@@ -285,6 +334,7 @@ export default {
       const interval = [Math.max(0, newVal-10), newVal];
       trajectories.timeExtent(interval);
       d3.select("#trajectories").call(trajectories);
+      console.log(this.timeInterval)
     },
   },
 }
@@ -341,7 +391,25 @@ svg g.trajectories path.selected {
 #location_list{
   overflow:scroll;
   overflow-x:hidden;
-  height:300px;
+  height:315px;
+}
+
+#cards_details {
+  overflow:scroll;
+  overflow-x:hidden;
+  height:315px;
+}
+
+.generic_details_cc{
+  background-color: #FF8800;
+}
+
+.generic_details_cash{
+  background-color: #2e7d32;
+}
+
+.generic_details_both{
+  background-color: #1565c0 ;
 }
 
 </style>
