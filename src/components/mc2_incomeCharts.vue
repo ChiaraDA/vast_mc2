@@ -11,7 +11,7 @@ import VuePlotly from '@statnett/vue-plotly';
 
                 
 export default {
-    name: 'mc2_locPopCharts',
+    name: 'mc2_incomeCharts',
     components: {
         VuePlotly
     },
@@ -22,7 +22,7 @@ export default {
         return {
             data: [{
                 x:["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-                y:[0,0,0,0,0,0,0],
+                y:[1,1,1,1,1,1,1],
             }],
             layout: {
                 height:250,
@@ -48,7 +48,7 @@ export default {
                 },
                 yaxis: {
                     title: {
-                        text: 'Count',
+                        text: 'Amount',
                         font: {
                             family: 'Quicksand, monospace',
                             size: 18,
@@ -65,9 +65,9 @@ export default {
     },
     watch: {
         cfAggregation(datum) {
-            this.data[0].y = datum.map(d => d.value);
-            this.data[0].x = datum.map(d => d.key.week_day);
-            this.layout.title.text = "Popularity of "+datum[0].key.location; 
+            this.data[0].y = datum.map(d => d.value.Price);
+            this.data[0].x = datum.map(d => d.value.Week_Day);
+            this.layout.title.text = "Income of "+datum[0].value.Location; 
         },
         deep: true
     }

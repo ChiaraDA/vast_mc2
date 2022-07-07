@@ -38,6 +38,7 @@ export default {
                         family: 'Quicksand, monospace',
                         size: 13
                     },
+                    xref: 'paper',
                 },
             },
             options: {
@@ -49,8 +50,7 @@ export default {
         cfAggregation(datum) {
             this.data[0].values = datum.map(d => d.value);
             this.data[0].labels = datum.map(d => d.key.category)
-            this.layout.title.text = datum[0].key.location + ", " + datum[0].key.day; 
-            console.log(this.layout.title.text)
+            this.layout.title.text = datum[0].key.location + ", " + datum[0].key.day;
         },
         deep: true
     }

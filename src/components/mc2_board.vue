@@ -33,7 +33,7 @@
             </b-col>
             <b-col class="b-col" md="4">
               <b-card bg-variant="light" header="Payment Methods Distribution" class="text-center">
-                  <b-card-text><mc2_cardsCharts :cfAggregation="cards_data_active"></mc2_cardsCharts></b-card-text>
+                  <b-card-text><mc2_cardsCharts :cfAggregation="cards_data"></mc2_cardsCharts></b-card-text>
               </b-card>
             </b-col>
         </b-row>
@@ -42,6 +42,14 @@
             <b-col class="b-col" md="12">
               <b-card bg-variant="light" header="Locations Popularity" class="text-center">
                 <b-card-text><mc2_locPopCharts :cfAggregation="pop_location"></mc2_locPopCharts></b-card-text>
+              </b-card>
+            </b-col>
+        </b-row>
+
+        <b-row id="charts_row2" align-v="stretch" class="b-row mt-5">
+            <b-col class="b-col" md="12">
+              <b-card bg-variant="light" header="Locations Income" class="text-center">
+                <b-card-text><mc2_incomeCharts :cfAggregation="inc_location"></mc2_incomeCharts></b-card-text>
               </b-card>
             </b-col>
         </b-row>
@@ -56,6 +64,7 @@ import mc2_carsData from '@/components/mc2_carsData.vue';
 import mc2_locPopCharts from '@/components/mc2_locPopCharts.vue';
 import mc2_cardsCharts from '@/components/mc2_cardsCharts.vue';
 import mc2_cardsData from '@/components/mc2_cardsData.vue';
+import mc2_incomeCharts from '@/components/mc2_incomeCharts.vue';
 import Trajectories from "@/assets/Trajectories";
 import crossfilter from 'crossfilter';
 
@@ -72,6 +81,7 @@ let cf;
 let dWeekPop;
 let dLocations;
 let dCards;
+let dIncome;
 let array_of_cards;
 
 export default {
@@ -82,18 +92,21 @@ export default {
     mc2_carsData,
     mc2_cardsCharts,
     mc2_cardsData,
+    mc2_incomeCharts,
   },
   data() {
     return {
         timeInterval:0,
         date_time:String,
         locations:[],
-        location_days:{},
-        activeItem: String,
+        activeItem: "Abila Airport",
+        pop_loc: [],
         pop_location:[],
         step:1,
+        cards_d: [],
         cards_data: [],
-        cards_data_active: [],
+        inc_loc:[],
+        inc_location: [],
     }
   },
   mounted() {
@@ -252,37 +265,55 @@ export default {
 
         const days = {'Monday': 1,'Tuesday': 2,'Wednesday': 3,'Thursday': 4,'Friday': 5,'Saturday': 6,'Sunday': 7};
 
-        dWeekPop = cf.dimension(function (d) {
-          return JSON.stringify ( { location: d.Location , week_day: d.Week_Day } ) ;
-        });
-
+        dWeekPop = cf.dimension(d => JSON.stringify ( { location: d.Location , week_day: d.Week_Day } ) )
+        
         const group = dWeekPop.group();
-        group.all().forEach(function(d) {
-          d.key = JSON.parse(d.key);
-        });
+        group.all().forEach(d => d.key = JSON.parse(d.key));
         const location_days = group.all();
-
+          
         location_days.sort((a, b) => {
           return days[a.key.week_day] - days[b.key.week_day];
         });
 
-        this.location_days = location_days
-        
+        this.pop_loc = location_days
         console.log("Location and Days", location_days)
 
-        dCards = cf.dimension(function (d) {
-          return JSON.stringify ( { location: d.Location, category: d.category , day: d.Day } ) ;
-        });
-        const group_cards = dCards.group();
-        group_cards.all().map(function(d) {
-          d.key = JSON.parse(d.key);
-        });
-        const cat_days = group_cards.all();
-        
-        this.cards_data = cat_days
-        console.log("Cards data", this.cards_data)
-        
+        dCards = cf.dimension(d => JSON.stringify ( { location: d.Location, category: d.category , day: d.Day } ))
 
+        const group1 = dCards.group()
+        group1.all().forEach(d => d.key = JSON.parse(d.key))
+        const cat_days = group1.all();
+        
+        this.cards_d = cat_days
+        console.log("Cards data", cat_days)
+
+        dIncome = cf.dimension(d => JSON.stringify ({ week_day: d.Week_Day, location: d.Location }))
+        const income_data = dIncome.group().reduce(
+          (output, input) => {
+            output.Price = output.Price + input.Price
+            output.Location = input.Location
+            output.Week_Day = input.Week_Day
+            return output;
+          },
+          (output, input) => {
+            output.Price = input.price
+            output.Location = input.Location
+            output.Week_Day = input.Week_Day
+            return output;
+          },
+          () => {
+            return {Price: null, Location:null, Week_Day:null}
+          }
+        ).all()
+        console.log("Income data: ",income_data)
+
+        income_data.sort((a, b) => {
+          return days[a.value.Week_Day] - days[b.value.Week_Day];
+        });
+        
+        this.inc_loc = income_data
+
+        this.refresh(this.activeItem, this.date_time)
       });
     
   },
@@ -308,25 +339,34 @@ export default {
     },
     get_location(loc) {
       this.activeItem = loc
-      this.activeItem = loc;
+      this.refresh(this.activeItem, this.date_time)
+    },
+    refresh(activeItem, dateTime) {
 
-      const activeItem_getDataLoc = this.location_days.filter(d => (d.key.location == this.activeItem));
-      console.log("Active Item Data", activeItem_getDataLoc)
-      this.pop_location = activeItem_getDataLoc
-
-      const activeItem_getDataCards = this.cards_data.filter(d => (d.key.day == this.date_time.split(" -")[0] && d.key.location == this.activeItem));
+      const activeItem_getDataCards = this.cards_d.filter(d => (d.key.day == dateTime.split(" -")[0] && d.key.location == activeItem));
       console.log("Active Item Data Cards", activeItem_getDataCards)
-      this.cards_data_active = activeItem_getDataCards
+      this.cards_data = activeItem_getDataCards
 
-      const activeItem_ccDetails = array_of_cards.filter(d => d.Location == this.activeItem && d.Day == this.date_time.split(" -")[0] && d.category == "CC");
+      const activeItem_ccDetails = array_of_cards.filter(d => d.Location == activeItem && d.Day == dateTime.split(" -")[0] && d.category == "CC");
       console.log("Active Item Cc Details", activeItem_ccDetails)
       this.$refs.cards_data.cc_details = activeItem_ccDetails
 
-      const activeItem_cashDetails = array_of_cards.filter(d => (d.Day == this.date_time.split(" -")[0] && d.Location == this.activeItem && d.category == "Cash"));
+      const activeItem_cashDetails = array_of_cards.filter(d => (d.Day == dateTime.split(" -")[0] && d.Location == activeItem && d.category == "Cash"));
+      console.log("Active Item Cash Details", activeItem_cashDetails)
       this.$refs.cards_data.cash_details = activeItem_cashDetails
 
-      const activeItem_bothDetails = array_of_cards.filter(d => (d.Day == this.date_time.split(" -")[0] && d.Location == this.activeItem && d.category == "Both"));
+      const activeItem_bothDetails = array_of_cards.filter(d => (d.Day == dateTime.split(" -")[0] && d.Location == activeItem && d.category == "Both"));
+      console.log("Active Item Both Details", activeItem_bothDetails)
       this.$refs.cards_data.both_details = activeItem_bothDetails
+
+      const activeItem_income = this.inc_loc.filter(d => (d.value.Location == this.activeItem));
+      console.log("Income", activeItem_income)
+      this.inc_location = activeItem_income
+
+      const activeItem_getDataLoc = this.pop_loc.filter(d => (d.key.location == this.activeItem));
+      console.log("Active Item Data", activeItem_getDataLoc)
+      this.pop_location = activeItem_getDataLoc
+
     }
   },
   watch: {
@@ -336,6 +376,12 @@ export default {
       d3.select("#trajectories").call(trajectories);
       console.log(this.timeInterval)
     },
+    date_time: {
+      handler(newVal) {
+        this.refresh(this.activeItem, newVal)
+      },
+      deep: true,
+    }
   },
 }
 </script>
@@ -400,16 +446,9 @@ svg g.trajectories path.selected {
   height:315px;
 }
 
-.generic_details_cc{
-  background-color: #FF8800;
-}
-
-.generic_details_cash{
-  background-color: #2e7d32;
-}
-
-.generic_details_both{
-  background-color: #1565c0 ;
+.generic_details{
+  background-color: #f2f2f2;
+  border-radius: 5px;
 }
 
 </style>
