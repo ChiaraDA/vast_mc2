@@ -24,7 +24,7 @@ export default function Trajectories() {
     }
     
 
-    function brushed(event) {
+    function brushended(event) {
         if (!event.selection) {
             return;
         }
@@ -38,20 +38,23 @@ export default function Trajectories() {
 
         const list = [];
         container.datum().forEach(p => {
-            const point = p.values[timeExtent[1]-1]
-            if (isWithin(point, extent_function(event))) {
-                list.push({
-                    id: p.id_car,
-                })
+            if(Object.keys(p.values).length >= timeExtent[1]){
+                const point = p.values[timeExtent[1]-1]
+                if (isWithin(point, extent_function(event))) {
+                    list.push({
+                        id: p.id_car,
+                    })
+                }
             }
+            return list;
         });
         dispatch.call('interval', this, list)
     }
 
     const brush = d3.brush()
-        .on('end', brushed)
+        .on('end', brushended)
 
-    let timeExtent = [0, 24713]
+    let timeExtent = [0, 1]
 
     function me(selection) {
 
@@ -78,7 +81,7 @@ export default function Trajectories() {
         dispatch.on('interval.trajs', (list) => {
             const cars = container.datum()
             const ids = list.map(d => d.id)
-
+            
             cars.forEach(p => {
                 if (ids.indexOf(p.id_car) >= 0) {
                     p.selected = true
@@ -86,13 +89,17 @@ export default function Trajectories() {
                     p.selected = false
                 }
             })
-            redraw(paths)
+            redraw(paths);
         })
     }
 
     function redraw(paths) {
         paths.classed('selected', d => d.selected)
-        .attr('d', d =>  `${path(d.values.slice(timeExtent[0], timeExtent[1]))}m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0 `)
+            .attr('d', d => {
+                if(path(d.values.slice(timeExtent[0], timeExtent[1])) != null){
+                    return (`${path(d.values.slice(timeExtent[0], timeExtent[1]))}m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0 `)
+                }
+            })
     }
 
     me.on = function (eventType, handler) {
@@ -105,7 +112,12 @@ export default function Trajectories() {
         if (!arguments.length) return timeExtent;
         timeExtent = _;
 
-        paths.attr('d', d =>  `${path(d.values.slice(timeExtent[0], timeExtent[1]))}m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0 `)
+        paths.attr('d', d => {
+            if(path(d.values.slice(timeExtent[0], timeExtent[1])) != null){
+                return (`${path(d.values.slice(timeExtent[0], timeExtent[1]))}m -2, 0 a 2,2 0 1,0 4,0 a 2,2 0 1,0 -4,0 `)
+            }
+        })
+        
 
         return me;
     }

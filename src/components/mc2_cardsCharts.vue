@@ -1,6 +1,5 @@
 <template>
     <div>
-        <h5>{{title}}</h5>
         <vue-plotly class="" :data="data" :layout="layout" :options="options"/>
     </div>  
 </template>
@@ -22,8 +21,8 @@ export default {
     data() {
         return {
             data: [{
-                labels:["Credit Card", "Cash", "Credit Card and Loyalty Card"],
-                values:[0,0,0],
+                labels:["No Data"],
+                values:[100],
                 type:"pie",
                 hole:.4,
                 textinfo: "label+percent",
@@ -48,9 +47,17 @@ export default {
     },
     watch: {
         cfAggregation(datum) {
-            this.data[0].values = datum.map(d => d.value);
-            this.data[0].labels = datum.map(d => d.key.category)
-            this.layout.title.text = datum[0].key.location + ", " + datum[0].key.day;
+            if(Object.keys(datum).length != 0){
+                this.data[0].values = datum.map(d => d.value);
+                this.data[0].labels = datum.map(d => d.key.category)
+                this.layout.title.text = datum[0].key.location + ", " + datum[0].key.day;
+            } else {
+                this.layout.title.text="No Data"
+                this.data[0].values = null
+                this.data[0].labels = null
+
+            }
+            
         },
         deep: true
     }

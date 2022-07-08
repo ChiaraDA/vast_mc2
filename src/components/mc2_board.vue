@@ -167,9 +167,8 @@ export default {
       this.$refs.cars_data.count_cars = 0
       this.$refs.cars_data.selected_cars=true
       const ids = list.map(p => p.id)
-      console.log(ids)
+      console.log("IDS", ids)
       this.$refs.cars_data.persons_car = this.$refs.cars_data.persons_car.map(p => {
-        console.log(this.$refs.cars_data.persons_car)
         if (ids.indexOf(p.id_car) >= 0) {
           this.$refs.cars_data.count_cars = this.$refs.cars_data.count_cars+1
           return {
@@ -313,6 +312,8 @@ export default {
         
         this.inc_loc = income_data
 
+        console.log(this.activeItem, this.date_time)
+
         this.refresh(this.activeItem, this.date_time)
       });
     
@@ -376,12 +377,12 @@ export default {
       d3.select("#trajectories").call(trajectories);
       console.log(this.timeInterval)
     },
-    date_time: {
-      handler(newVal) {
+    date_time(newVal) {
+      console.log(newVal)
+      if(newVal!="January 06, 2014 - 06:28"){
         this.refresh(this.activeItem, newVal)
-      },
-      deep: true,
-    }
+      }
+    },
   },
 }
 </script>
